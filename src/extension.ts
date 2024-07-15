@@ -1,7 +1,5 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import { MessageHandlerData } from '@estruyf/vscode';
-import { join } from 'path';
+import { join, relative } from 'path';
 import * as vscode from 'vscode';
 import { ExtensionContext, ExtensionMode, Uri, Webview } from 'vscode';
 
@@ -18,17 +16,42 @@ export function activate(context: vscode.ExtensionContext) {
       }
     );
 
-    panel.webview.onDidReceiveMessage(message => {
+    panel.webview.onDidReceiveMessage(async message => {
       const { command, requestId, payload } = message;
 
       if (command === "GET_DATA") {
-        // Do something with the payload
+        const excludePatterns = [
+          '**/node_modules/**',
+          '**/dist/**',
+          '**/build/**',
+          '**/coverage/**',
+          '**/__tests__/**',
+          '**/__mocks__/**',
+          '**/__snapshots__/**',
+          '**/test/**',
+          '**/tests/**',
+          '**/spec/**',
+          '**/specs/**',
+          '**/setupTests.tsx',
+          '**/*.spec.tsx',
+          '**/*.test.tsx',
+        ];
+
+        // Find all .tsx files and exclude the specified patterns
+        const files = await vscode.workspace.findFiles('**/*.tsx', `{${excludePatterns.join(',')}}`);
+
+        // Get the workspace root path
+        const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
+
+        // Calculate relative paths
+        const filePaths = files.map(file => relative(workspaceFolder, file.fsPath));
+
 
         // Send a response back to the webview
         panel.webview.postMessage({
           command,
           requestId, // The requestId is used to identify the response
-          payload: `Hello from the extension!`
+          payload: JSON.stringify(filePaths)
         } as MessageHandlerData<string>);
       } else if (command === "GET_DATA_ERROR") {
         panel.webview.postMessage({
