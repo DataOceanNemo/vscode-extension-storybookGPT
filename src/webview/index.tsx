@@ -1,5 +1,5 @@
 import * as React from "react";
-import { render } from "react-dom";
+import { createRoot } from "react-dom/client";
 import { App } from "./App";
 
 declare const acquireVsCodeApi: <T = unknown>() => {
@@ -10,7 +10,8 @@ declare const acquireVsCodeApi: <T = unknown>() => {
 
 const elm = document.querySelector("#root");
 if (elm) {
-  render(<App />, elm);
+  const root = createRoot(elm); // createRoot(container!) if you use TypeScript
+  root.render(<App />);
 }
 
 // Webpack HMR

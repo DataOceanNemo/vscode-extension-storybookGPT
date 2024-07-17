@@ -1,7 +1,8 @@
 import { MessageHandlerData } from '@estruyf/vscode';
-import { join, relative } from 'path';
+import { join } from 'path';
 import * as vscode from 'vscode';
 import { ExtensionContext, ExtensionMode, Uri, Webview } from 'vscode';
+import { findReactTsxWithoutStories } from './utils';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -20,32 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
       const { command, requestId, payload } = message;
 
       if (command === "GET_DATA") {
-        const excludePatterns = [
-          '**/node_modules/**',
-          '**/dist/**',
-          '**/build/**',
-          '**/coverage/**',
-          '**/__tests__/**',
-          '**/__mocks__/**',
-          '**/__snapshots__/**',
-          '**/test/**',
-          '**/tests/**',
-          '**/spec/**',
-          '**/specs/**',
-          '**/setupTests.tsx',
-          '**/*.spec.tsx',
-          '**/*.test.tsx',
-        ];
-
-        // Find all .tsx files and exclude the specified patterns
-        const files = await vscode.workspace.findFiles('**/*.tsx', `{${excludePatterns.join(',')}}`);
-
-        // Get the workspace root path
-        const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
-
-        // Calculate relative paths
-        const filePaths = files.map(file => relative(workspaceFolder, file.fsPath));
-
+        const filePaths = await findReactTsxWithoutStories();
 
         // Send a response back to the webview
         panel.webview.postMessage({
