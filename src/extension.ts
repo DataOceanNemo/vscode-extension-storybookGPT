@@ -2,7 +2,7 @@ import { MessageHandlerData } from '@estruyf/vscode';
 import { join } from 'path';
 import * as vscode from 'vscode';
 import { ExtensionContext, ExtensionMode, Uri, Webview } from 'vscode';
-import { findReactTsxWithoutStories } from './utils';
+import { createStoriesFiles, findReactTsxWithoutStories } from './utils';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -29,14 +29,11 @@ export function activate(context: vscode.ExtensionContext) {
           requestId, // The requestId is used to identify the response
           payload: JSON.stringify(filePaths)
         } as MessageHandlerData<string>);
-      } else if (command === "GET_DATA_ERROR") {
-        panel.webview.postMessage({
-          command,
-          requestId, // The requestId is used to identify the response
-          error: `Oops, something went wrong!`
-        } as MessageHandlerData<string>);
       } else if (command === "POST_DATA") {
-        vscode.window.showInformationMessage(`Received data from the webview: ${payload.msg}`);
+        vscode.window.showInformationMessage('Calling chatGPT to generate stories...');
+        await createStoriesFiles(JSON.parse(payload.msg));
+
+        vscode.window.showInformationMessage('Generation completed!');
       }
     }, undefined, context.subscriptions);
 

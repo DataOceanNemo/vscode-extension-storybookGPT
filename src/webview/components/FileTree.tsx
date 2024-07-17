@@ -1,9 +1,10 @@
+import { messageHandler } from "@estruyf/vscode/dist/client";
 import Tree from "rc-tree";
 import "rc-tree/assets/index.css";
 import * as React from "react";
 import { useEffect, useState } from "react";
 
-interface FileNode {
+export interface FileNode {
   key: string;
   title: string;
   children: FileNode[];
@@ -84,6 +85,33 @@ const countSelectedFiles = (
   return count;
 };
 
+const mergeCheckedKeysWithTreeData = (
+  treeData: FileNode[],
+  checkedKeys: string[]
+): FileNode[] => {
+  return treeData
+    .filter(
+      (node) =>
+        checkedKeys.includes(node.key) ||
+        node.children.some(
+          (child) =>
+            checkedKeys.includes(child.key) ||
+            child.children.some((grandChild) =>
+              checkedKeys.includes(grandChild.key)
+            )
+        )
+    )
+    .map((node) => {
+      const isChecked = checkedKeys.includes(node.key);
+      return {
+        ...node,
+        checked: isChecked,
+        children: mergeCheckedKeysWithTreeData(node.children, checkedKeys),
+      };
+    })
+    .filter((node) => node.checked || node.children.length > 0);
+};
+
 const FileTree: React.FC<Props> = ({ files }) => {
   const {
     nodes,
@@ -124,12 +152,19 @@ const FileTree: React.FC<Props> = ({ files }) => {
     setSelectedFilesCount(newSelectedFilesCount);
   }, [files]);
 
+  const sendMessage = () => {
+    const mergedData = mergeCheckedKeysWithTreeData(treeData, checkedKeys);
+    messageHandler.send("POST_DATA", { msg: JSON.stringify(mergedData) });
+  };
+
   return (
     <div>
       <div>Total files: {totalFiles}</div>
-      <div>Total selected files: {selectedFilesCount}</div>
       <p></p>
-      <button onClick={clearSelections}>Clear All Selections</button>
+      <button onClick={clearSelections}>Clear All Selections</button>{" "}
+      <button onClick={sendMessage} disabled={selectedFilesCount === 0}>
+        Generate stories for selected {selectedFilesCount} files
+      </button>
       <p></p>
       <Tree
         checkable
