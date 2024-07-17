@@ -2,6 +2,7 @@ import * as path from 'path';
 import { relative } from 'path';
 import * as vscode from 'vscode';
 import { FileNode } from './webview/components/FileTree';
+import { ComponentConverter } from './webview/utils/componentConverter';
 
 const excludePatterns = [
   '**/node_modules/**',
@@ -60,10 +61,21 @@ export const createStoriesFiles = async (fileNodes: FileNode[]) => {
         const fileUri = vscode.Uri.file(filePath);
         const storyFileUri = vscode.Uri.file(storyFilePath);
 
-        const data = await vscode.workspace.fs.readFile(fileUri);
-        await vscode.workspace.fs.writeFile(storyFileUri, data);
+        const fileContent = await vscode.workspace.fs.readFile(fileUri);
+
+        // Convert Uint8Array to string using TextDecoder
+        const textDecoder = new TextDecoder('utf-8');
+        const fileContentString = textDecoder.decode(fileContent);
+
+        const story = await ComponentConverter({
+          component: fileContentString,
+        });
+
+        const textEncoder = new TextEncoder();
+        await vscode.workspace.fs.writeFile(storyFileUri, textEncoder.encode(story || ''));
 
       } catch (err) {
+        console.log(err);
         vscode.window.showErrorMessage(`Error processing file: ${filePath}`);
       }
     }

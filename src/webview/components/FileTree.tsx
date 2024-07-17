@@ -124,6 +124,7 @@ const FileTree: React.FC<Props> = ({ files }) => {
   const [selectedFilesCount, setSelectedFilesCount] = useState<number>(
     countSelectedFiles(initialCheckedKeys, nodes)
   );
+  const [generating, setGenerating] = useState<boolean>(false);
 
   const onCheck = (checkedKeysValue: any) => {
     setCheckedKeys(checkedKeysValue);
@@ -153,16 +154,31 @@ const FileTree: React.FC<Props> = ({ files }) => {
   }, [files]);
 
   const sendMessage = () => {
+    setGenerating(true);
     const mergedData = mergeCheckedKeysWithTreeData(treeData, checkedKeys);
     messageHandler.send("POST_DATA", { msg: JSON.stringify(mergedData) });
   };
+
+  useEffect(() => {
+    window.addEventListener("message", (event) => {
+      const message = event.data;
+      switch (message.command) {
+        case "RESULT":
+          setGenerating(false);
+          break;
+      }
+    });
+  }, []);
 
   return (
     <div>
       <div>Total files: {totalFiles}</div>
       <p></p>
       <button onClick={clearSelections}>Clear All Selections</button>{" "}
-      <button onClick={sendMessage} disabled={selectedFilesCount === 0}>
+      <button
+        onClick={sendMessage}
+        disabled={selectedFilesCount === 0 || generating}
+      >
         Generate stories for selected {selectedFilesCount} files
       </button>
       <p></p>
@@ -172,6 +188,7 @@ const FileTree: React.FC<Props> = ({ files }) => {
         onCheck={onCheck}
         treeData={treeData}
         selectable={false}
+        disabled={generating}
       />
     </div>
   );

@@ -5,7 +5,6 @@ import { ExtensionContext, ExtensionMode, Uri, Webview } from 'vscode';
 import { createStoriesFiles, findReactTsxWithoutStories } from './utils';
 
 export function activate(context: vscode.ExtensionContext) {
-
   let disposable = vscode.commands.registerCommand('vscode-storybookGPT.openWebview', () => {
     const panel = vscode.window.createWebviewPanel(
       'react-webview',
@@ -34,6 +33,9 @@ export function activate(context: vscode.ExtensionContext) {
         await createStoriesFiles(JSON.parse(payload.msg));
 
         vscode.window.showInformationMessage('Generation completed!');
+
+        // Send a response back to the webview
+        panel.webview.postMessage({ command: 'RESULT', result: {} });
       }
     }, undefined, context.subscriptions);
 
