@@ -50,7 +50,7 @@ export const findReactTsxWithoutStories = async () => {
 }
 
 
-export const createStoriesFiles = async (fileNodes: string[]) => {
+export const createStoriesFiles = async (fileNodes: string[], openaiApiKey: string) => {
   for (const node of fileNodes) {
     if (node.endsWith('.tsx')) {
       const filePath = path.resolve(workspaceFolder, node);
@@ -68,14 +68,17 @@ export const createStoriesFiles = async (fileNodes: string[]) => {
 
         const story = await ComponentConverter({
           component: fileContentString,
+          openaiApiKey: openaiApiKey
         });
 
         const textEncoder = new TextEncoder();
         await vscode.workspace.fs.writeFile(storyFileUri, textEncoder.encode(story || ''));
 
-      } catch (err) {
-        console.log(err);
-        vscode.window.showErrorMessage(`Error processing file: ${filePath}`);
+      } catch (error) {
+        console.error(error);
+        vscode.window.showErrorMessage(`Error processing file: ${filePath}. Error message: : ${error instanceof Error ? error.message :
+          'Unknown error'
+          }`);
       }
     }
   }

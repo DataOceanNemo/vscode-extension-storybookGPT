@@ -20,6 +20,14 @@
       {
         "command": "vscode-storybookGPT.openWebview",
         "title": "storybookGPT: Open"
+      },
+      {
+        "command": "vscode-storybookGPT.deleteApiKey",
+        "title": "storybookGPT: Delete OpenAI API Key"
+      },
+      {
+        "command": "vscode-storybookGPT.resetApiKey",
+        "title": "storybookGPT: Reset OpenAI API Key"
       }
     ]
   },

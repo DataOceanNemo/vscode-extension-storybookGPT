@@ -5,7 +5,7 @@ import { ExtensionContext, ExtensionMode, Uri, Webview } from 'vscode';
 import { createStoriesFiles, findReactTsxWithoutStories } from './utils';
 
 export function activate(context: vscode.ExtensionContext) {
-  let disposable = vscode.commands.registerCommand('vscode-storybookGPT.openWebview', () => {
+  let openWebviewDisposable = vscode.commands.registerCommand('vscode-storybookGPT.openWebview', () => {
     const panel = vscode.window.createWebviewPanel(
       'react-webview',
       'storybookGPT',
@@ -30,7 +30,34 @@ export function activate(context: vscode.ExtensionContext) {
         } as MessageHandlerData<string>);
       } else if (command === "POST_DATA") {
         vscode.window.showInformationMessage('Calling chatGPT to generate stories...');
-        await createStoriesFiles(JSON.parse(payload.msg));
+        // Check if OpenAI API key is set
+        let openaiApiKey = process.env.OPENAI_API_KEY;
+        if (!openaiApiKey) {
+          // Try to get it from VS Code's credential storage
+          openaiApiKey = await context.secrets.get('OPENAI_API_KEY');
+          if (!openaiApiKey) {
+            // Prompt user to input API key
+            const inputApiKey = await vscode.window.showInputBox({
+              prompt: 'Enter your OpenAI API Key',
+              ignoreFocusOut: true,
+              placeHolder: 'sk-...',
+              password: true,
+            });
+
+            if (inputApiKey) {
+              openaiApiKey = inputApiKey;
+              // store the API key in VS Code's credential storage
+              await context.secrets.store('OPENAI_API_KEY', inputApiKey);
+            } else {
+              vscode.window.showErrorMessage('OpenAI API Key is required to generate stories.');
+              // Send a response back to the webview
+              panel.webview.postMessage({ command: 'RESULT', result: {} });
+
+              return;
+            }
+          }
+        }
+        await createStoriesFiles(JSON.parse(payload.msg), openaiApiKey);
 
         vscode.window.showInformationMessage('Generation completed!');
 
@@ -42,7 +69,45 @@ export function activate(context: vscode.ExtensionContext) {
     panel.webview.html = getWebviewContent(context, panel.webview);
   });
 
-  context.subscriptions.push(disposable);
+  // Command to delete the API key from the secret storage
+  let deleteApiKeyDisposable = vscode.commands.registerCommand('vscode-storybookGPT.deleteApiKey', async () => {
+    const secretKey = 'OPENAI_API_KEY';
+    try {
+      await context.secrets.delete(secretKey);
+      vscode.window.showInformationMessage(`Secret ${secretKey} has been deleted successfully.`);
+    } catch (error) {
+      vscode.window.showErrorMessage(`Failed to delete secret ${secretKey}: ${error instanceof Error ? error.message :
+        'Unknown error'
+        }`);
+    }
+  });
+
+
+  // Command to reset the API key in the secret storage
+  let resetApiKeyDisposable = vscode.commands.registerCommand('vscode-storybookGPT.resetApiKey', async () => {
+    const secretKey = 'OPENAI_API_KEY';
+    try {
+      const inputApiKey = await vscode.window.showInputBox({
+        prompt: 'Enter your new OpenAI API Key',
+        ignoreFocusOut: true,
+        placeHolder: 'sk-...',
+        password: true,
+      });
+
+      if (inputApiKey) {
+        await context.secrets.store(secretKey, inputApiKey);
+        vscode.window.showInformationMessage(`Secret ${secretKey} has been reset successfully.`);
+      } else {
+        vscode.window.showErrorMessage('OpenAI API Key reset canceled.');
+      }
+    } catch (error) {
+      vscode.window.showErrorMessage(`Failed to reset secret ${secretKey}: ${error instanceof Error ? error.message :
+        'Unknown error'
+        }`);
+    }
+  });
+
+  context.subscriptions.push(openWebviewDisposable, deleteApiKeyDisposable, resetApiKeyDisposable);
 }
 
 // this method is called when your extension is deactivated
