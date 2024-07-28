@@ -1,7 +1,6 @@
 import * as path from 'path';
 import { relative } from 'path';
 import * as vscode from 'vscode';
-import { FileNode } from './webview/components/FileTree';
 import { ComponentConverter } from './webview/utils/componentConverter';
 
 const excludePatterns = [
@@ -19,11 +18,13 @@ const excludePatterns = [
   '**/setupTests.tsx',
   '**/*.spec.tsx',
   '**/*.test.tsx',
+  '**/*.docs.tsx',
+  '**/*.e2e.tsx',
+  '**/*.helper.tsx',
 ];
 
-
 // Get the workspace root path
-const workspaceFolder = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.fsPath : '';
+const workspaceFolder = vscode.workspace.workspaceFolders ? path.posix.normalize(vscode.workspace.workspaceFolders[0].uri.fsPath) : '';
 
 export const findReactTsxWithoutStories = async () => {
   // Search for all .tsx files excluding .stories.tsx and .test.tsx
@@ -43,18 +44,16 @@ export const findReactTsxWithoutStories = async () => {
   );
 
   // Calculate relative paths
-  const filePaths = componentsWithoutStories.map(file => relative(workspaceFolder, (file as vscode.Uri).fsPath));
+  const filePaths = componentsWithoutStories.map(file => relative(workspaceFolder, (file as vscode.Uri).fsPath).replace(/\\/g, '/'));
 
   return filePaths;
 }
 
 
-export const createStoriesFiles = async (fileNodes: FileNode[]) => {
+export const createStoriesFiles = async (fileNodes: string[]) => {
   for (const node of fileNodes) {
-    if (node.children && node.children.length > 0) {
-      await createStoriesFiles(node.children);
-    } else if (node.checked) {
-      const filePath = path.resolve(workspaceFolder, node.key);
+    if (node.endsWith('.tsx')) {
+      const filePath = path.resolve(workspaceFolder, node);
       const storyFilePath = filePath.replace(/\.tsx$/, '.stories.tsx');
 
       try {

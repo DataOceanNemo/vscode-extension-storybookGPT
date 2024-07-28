@@ -31,7 +31,7 @@ const buildTree = (
   let fileCount = 0;
 
   paths.forEach((path) => {
-    const parts = path.split("\\");
+    const parts = path.split("/");
     let current = root;
 
     parts.forEach((part, index) => {
@@ -39,7 +39,7 @@ const buildTree = (
 
       if (!node) {
         node = {
-          key: parts.slice(0, index + 1).join("\\"),
+          key: parts.slice(0, index + 1).join("/"),
           title: part,
           children: [],
           checked: true,
@@ -85,33 +85,6 @@ const countSelectedFiles = (
   return count;
 };
 
-const mergeCheckedKeysWithTreeData = (
-  treeData: FileNode[],
-  checkedKeys: string[]
-): FileNode[] => {
-  return treeData
-    .filter(
-      (node) =>
-        checkedKeys.includes(node.key) ||
-        node.children.some(
-          (child) =>
-            checkedKeys.includes(child.key) ||
-            child.children.some((grandChild) =>
-              checkedKeys.includes(grandChild.key)
-            )
-        )
-    )
-    .map((node) => {
-      const isChecked = checkedKeys.includes(node.key);
-      return {
-        ...node,
-        checked: isChecked,
-        children: mergeCheckedKeysWithTreeData(node.children, checkedKeys),
-      };
-    })
-    .filter((node) => node.checked || node.children.length > 0);
-};
-
 const FileTree: React.FC<Props> = ({ files }) => {
   const {
     nodes,
@@ -155,8 +128,7 @@ const FileTree: React.FC<Props> = ({ files }) => {
 
   const sendMessage = () => {
     setGenerating(true);
-    const mergedData = mergeCheckedKeysWithTreeData(treeData, checkedKeys);
-    messageHandler.send("POST_DATA", { msg: JSON.stringify(mergedData) });
+    messageHandler.send("POST_DATA", { msg: JSON.stringify(checkedKeys) });
   };
 
   useEffect(() => {
