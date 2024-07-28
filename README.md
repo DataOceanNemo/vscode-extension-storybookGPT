@@ -1,5 +1,7 @@
 # storybookGPT README
 
+Inspired by https://storybook.js.org/blog/build-your-own-storybook-gpt/
+
 This extension assists you in scanning your React `.tsx` components of current workspace and automates the generation of Storybook stories using OpenAI's GPT model `gpt-3.5-turbo`.
 
 ## Demo
