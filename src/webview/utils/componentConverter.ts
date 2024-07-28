@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 
-export const template = `import type { Meta, StoryObj } from '@storybook/react';\n//import component\nconst meta: Meta<//type of component> = {\n title: //title of component,\n component: //component\n};\nexport default meta;\ntype Story = StoryObj<//type of component>;\nconst StoryTemplate: Story = {\n render: (args) => //render component\n};\nexport Primary = {\n ...StoryTemplate,\n args: {\n //component's props\n}\n}`;
+export const template = `import type { Meta, StoryObj } from '@storybook/react';\n//import component\n//import related type definitions\nconst meta: Meta<//type of component> = {\n title: //title of component,\n component: //component\n};\nexport default meta;\ntype Story = StoryObj<//type of component>;\nconst StoryTemplate: Story = {\n render: (args) => //render component\n};\nexport Primary = {\n ...StoryTemplate,\n args: {\n //component's props\n}\n}`;
 
 export type ConvertType = {
   component: string;
