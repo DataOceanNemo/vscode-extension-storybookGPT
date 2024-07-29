@@ -1,4 +1,5 @@
 import { messageHandler } from "@estruyf/vscode/dist/client";
+import { VSCodeButton } from "@vscode/webview-ui-toolkit/react";
 import Tree from "rc-tree";
 import "rc-tree/assets/index.css";
 import * as React from "react";
@@ -143,16 +144,18 @@ const FileTree: React.FC<Props> = ({ files }) => {
   }, []);
 
   return (
-    <div>
+    <div className="file-tree__content">
       <div>Total files: {totalFiles}</div>
       <p></p>
-      <button onClick={clearSelections}>Clear All Selections</button>{" "}
-      <button
+      <VSCodeButton onClick={clearSelections} appearance="secondary">
+        Clear All Selections
+      </VSCodeButton>{" "}
+      <VSCodeButton
         onClick={sendMessage}
         disabled={selectedFilesCount === 0 || generating}
       >
         Generate stories for selected {selectedFilesCount} files
-      </button>
+      </VSCodeButton>
       <p></p>
       <Tree
         checkable

@@ -17,3 +17,31 @@ h1 {
 .app__error {
   color: var(--vscode-editorError-foreground);
 }
+
+.file-tree__content {
+  margin-top: 10px;
+}
+
+.settings {
+  margin: 15px 0;
+}
+
+.settings__content {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid var(--vscode-editorWidget-border);
+  border-radius: 4px;
+  background-color: var(--vscode-editorWidget-background);
+}
+
+.settings__field {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings__field-label {
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+

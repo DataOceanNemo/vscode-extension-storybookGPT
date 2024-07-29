@@ -3,30 +3,11 @@ import { relative } from 'path';
 import * as vscode from 'vscode';
 import { ComponentConverter } from './webview/utils/componentConverter';
 
-const excludePatterns = [
-  '**/node_modules/**',
-  '**/dist/**',
-  '**/build/**',
-  '**/coverage/**',
-  '**/__tests__/**',
-  '**/__mocks__/**',
-  '**/__snapshots__/**',
-  '**/test/**',
-  '**/tests/**',
-  '**/spec/**',
-  '**/specs/**',
-  '**/setupTests.tsx',
-  '**/*.spec.tsx',
-  '**/*.test.tsx',
-  '**/*.docs.tsx',
-  '**/*.e2e.tsx',
-  '**/*.helper.tsx',
-];
 
 // Get the workspace root path
 const workspaceFolder = vscode.workspace.workspaceFolders ? path.posix.normalize(vscode.workspace.workspaceFolders[0].uri.fsPath) : '';
 
-export const findReactTsxWithoutStories = async () => {
+export const findReactTsxWithoutStories = async (excludePatterns: string[]) => {
   // Search for all .tsx files excluding .stories.tsx and .test.tsx
   const allComponents = await vscode.workspace.findFiles('**/*.tsx', `{${excludePatterns.join(',')},**/*.stories.*}`);
   const allStories = await vscode.workspace.findFiles('**/*.stories.{tsx,ts}', `{${excludePatterns.join(',')}}`);
@@ -50,7 +31,7 @@ export const findReactTsxWithoutStories = async () => {
 }
 
 
-export const createStoriesFiles = async (fileNodes: string[], openaiApiKey: string) => {
+export const createStoriesFiles = async (fileNodes: string[], openaiApiKey: string, selectedModel = 'gpt-3.5-turbo') => {
   for (const node of fileNodes) {
     if (node.endsWith('.tsx')) {
       const filePath = path.resolve(workspaceFolder, node);
@@ -68,7 +49,8 @@ export const createStoriesFiles = async (fileNodes: string[], openaiApiKey: stri
 
         const story = await ComponentConverter({
           component: fileContentString,
-          openaiApiKey: openaiApiKey
+          openaiApiKey: openaiApiKey,
+          selectedModel,
         });
 
         const textEncoder = new TextEncoder();

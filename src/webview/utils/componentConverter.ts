@@ -5,17 +5,24 @@ export const template = `import type { Meta, StoryObj } from '@storybook/react';
 export type ConvertType = {
   component: string;
   openaiApiKey: string;
+  selectedModel: string;
 };
 
-export async function ComponentConverter({ component, openaiApiKey }: ConvertType) {
+function stripCodeBlockAnnotations(text: string) {
+  return text.replace(/```(typescript|javascript)?\n([\s\S]*?)\n```/g, '$2');
+}
+
+export async function ComponentConverter({ component, openaiApiKey, selectedModel }: ConvertType) {
   const prompt = `Write a Storybook component from a React component, without any comments added.\nThis is the template I want you to use to create the storybook component, keep the provided format, add component variants if possible:\n${template}\n`;
 
   const openai = new OpenAI({
     apiKey: openaiApiKey,
   });
 
+  console.log(`Using chatGPT model: `, selectedModel);
+
   const response = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
+    model: selectedModel,
     messages: [
       {
         role: "system",
@@ -33,7 +40,7 @@ export async function ComponentConverter({ component, openaiApiKey }: ConvertTyp
     stream: false,
   });
 
-  return response.choices[0].message.content;
+  return stripCodeBlockAnnotations(response.choices[0].message.content || '');
 }
 
 // export async function ComponentConverter({ component }: ConvertType) {

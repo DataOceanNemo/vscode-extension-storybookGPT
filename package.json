@@ -48,7 +48,6 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@estruyf/vscode": "^1.1.0",
     "@types/glob": "^7.2.0",
     "@types/mocha": "^9.1.1",
     "@types/node": "16.x",
@@ -56,6 +55,7 @@
     "@types/react-dom": "^18.0.6",
     "@types/uuid": "^8.3.4",
     "@types/vscode": "^1.71.0",
+    "@types/vscode-webview": "^1.57.0",
     "@types/webpack": "^5.28.1",
     "@types/webpack-dev-server": "^4.7.2",
     "@typescript-eslint/eslint-plugin": "^5.31.0",
@@ -72,8 +72,6 @@
     "openai": "^4.52.7",
     "postcss-loader": "^7.0.1",
     "rc-tree": "^5.8.8",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
     "rimraf": "^3.0.2",
     "style-loader": "^3.3.1",
     "ts-loader": "^9.4.1",
@@ -81,5 +79,11 @@
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0",
     "webpack-dev-server": "^4.11.1"
+  },
+  "dependencies": {
+    "@estruyf/vscode": "^1.1.0",
+    "@vscode/webview-ui-toolkit": "^1.4.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   }
 }

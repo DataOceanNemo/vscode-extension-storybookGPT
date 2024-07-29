@@ -19,8 +19,22 @@ export function activate(context: vscode.ExtensionContext) {
     panel.webview.onDidReceiveMessage(async message => {
       const { command, requestId, payload } = message;
 
-      if (command === "GET_DATA") {
-        const filePaths = await findReactTsxWithoutStories();
+      if (command === "GET_GLOBAL_STATE") {
+        // Send a response back to the webview
+        panel.webview.postMessage({
+          command,
+          requestId,
+          payload: JSON.stringify({
+            selectedModel: context.globalState.get('selectedModel'),
+            excludePatterns: context.globalState.get('excludePatterns'),
+          })
+        } as MessageHandlerData<string>);
+      } else if (command === "GET_DATA") {
+        const filePaths = await findReactTsxWithoutStories(payload.excludePatterns.split('\n'));
+
+        // Store data
+        context.globalState.update('selectedModel', payload.selectedModel);
+        context.globalState.update('excludePatterns', payload.excludePatterns);
 
         // Send a response back to the webview
         panel.webview.postMessage({
@@ -57,7 +71,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
           }
         }
-        await createStoriesFiles(JSON.parse(payload.msg), openaiApiKey);
+        await createStoriesFiles(JSON.parse(payload.msg), openaiApiKey, context.globalState.get('selectedModel'));
 
         vscode.window.showInformationMessage('Generation completed!');
 
