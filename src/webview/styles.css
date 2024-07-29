@@ -1,4 +1,3 @@
-
 h1 {
   font-family: var(--vscode-editor-font-family);
 }
@@ -8,9 +7,10 @@ h1 {
   max-width: 80rem;
 }
 
-.app__actions {
+.app__actions,
+.tree__actions {
   display: flex;
-  gap: 1rem;
+  gap: 15px;
   margin-bottom: 10px;
 }
 
@@ -26,12 +26,21 @@ h1 {
   margin: 15px 0;
 }
 
+.settings__field-label {
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
 .settings__content {
   margin-top: 10px;
-  padding: 10px;
   border: 1px solid var(--vscode-editorWidget-border);
   border-radius: 4px;
   background-color: var(--vscode-editorWidget-background);
+  padding-top: 10px;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: flex-end;
+  flex-wrap: wrap;
 }
 
 .settings__field {
@@ -40,8 +49,21 @@ h1 {
   flex-direction: column;
 }
 
-.settings__field-label {
-  margin-bottom: 5px;
-  font-weight: bold;
+.column {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 35%;
 }
 
+.template-column {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 60%;
+}
+
+/* Media query for smaller screens */
+@media (max-width: 768px) {
+  .column, .template-column {
+    flex: 0 0 95%;
+  }
+}

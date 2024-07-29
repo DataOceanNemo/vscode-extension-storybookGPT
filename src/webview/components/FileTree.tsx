@@ -4,6 +4,7 @@ import Tree from "rc-tree";
 import "rc-tree/assets/index.css";
 import * as React from "react";
 import { useEffect, useState } from "react";
+import { MessageCommands } from "../utils/constants";
 
 export interface FileNode {
   key: string;
@@ -129,14 +130,16 @@ const FileTree: React.FC<Props> = ({ files }) => {
 
   const sendMessage = () => {
     setGenerating(true);
-    messageHandler.send("POST_DATA", { msg: JSON.stringify(checkedKeys) });
+    messageHandler.send(MessageCommands.GENERATE_REQUEST, {
+      msg: JSON.stringify(checkedKeys),
+    });
   };
 
   useEffect(() => {
     window.addEventListener("message", (event) => {
       const message = event.data;
       switch (message.command) {
-        case "RESULT":
+        case MessageCommands.GENERATE_RESULT:
           setGenerating(false);
           break;
       }
@@ -145,18 +148,20 @@ const FileTree: React.FC<Props> = ({ files }) => {
 
   return (
     <div className="file-tree__content">
-      <div>Total files: {totalFiles}</div>
-      <p></p>
-      <VSCodeButton onClick={clearSelections} appearance="secondary">
-        Clear All Selections
-      </VSCodeButton>{" "}
-      <VSCodeButton
-        onClick={sendMessage}
-        disabled={selectedFilesCount === 0 || generating}
-      >
-        Generate stories for selected {selectedFilesCount} files
-      </VSCodeButton>
-      <p></p>
+      <p>Total files: {totalFiles}</p>
+
+      <div className="tree__actions">
+        <VSCodeButton
+          onClick={sendMessage}
+          disabled={selectedFilesCount === 0 || generating}
+        >
+          Generate stories for selected {selectedFilesCount} files
+        </VSCodeButton>
+
+        <VSCodeButton onClick={clearSelections} appearance="secondary">
+          Clear All Selections
+        </VSCodeButton>
+      </div>
       <Tree
         checkable
         checkedKeys={checkedKeys}

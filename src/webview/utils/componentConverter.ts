@@ -1,18 +1,18 @@
 import OpenAI from "openai";
 
-export const template = `import type { Meta, StoryObj } from '@storybook/react';\n//import component\n//import related type definitions\nconst meta: Meta<//type of component> = {\n title: //title of component,\n component: //component\n};\nexport default meta;\ntype Story = StoryObj<//type of component>;\nconst StoryTemplate: Story = {\n render: (args) => //render component\n};\nexport Primary = {\n ...StoryTemplate,\n args: {\n //component's props\n}\n}`;
 
 export type ConvertType = {
   component: string;
   openaiApiKey: string;
   selectedModel: string;
+  template: string;
 };
 
 function stripCodeBlockAnnotations(text: string) {
   return text.replace(/```(typescript|javascript)?\n([\s\S]*?)\n```/g, '$2');
 }
 
-export async function ComponentConverter({ component, openaiApiKey, selectedModel }: ConvertType) {
+export async function ComponentConverter({ component, openaiApiKey, selectedModel, template }: ConvertType) {
   const prompt = `Write a Storybook component from a React component, without any comments added.\nThis is the template I want you to use to create the storybook component, keep the provided format, add component variants if possible:\n${template}\n`;
 
   const openai = new OpenAI({

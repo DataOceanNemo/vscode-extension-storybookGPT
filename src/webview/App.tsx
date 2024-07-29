@@ -15,36 +15,14 @@ import {
 } from "react";
 import FileTree from "./components/FileTree";
 import "./styles.css";
+import {
+  defaultExcludePatterns,
+  defaultTemplate,
+  MessageCommands,
+  models,
+} from "./utils/constants";
 
 export interface IAppProps {}
-
-const models = [
-  { label: "GPT-3.5 (default)", value: "gpt-3.5" },
-  { label: "GPT-4o", value: "gpt-4o" },
-  { label: "GPT-4o-mini", value: "gpt-4o-mini" },
-  { label: "GPT-4", value: "gpt-4" },
-  { label: "GPT-4-turbo", value: "gpt-4-turbo" },
-];
-
-const initialExcludePatterns = [
-  "**/node_modules/**",
-  "**/dist/**",
-  "**/build/**",
-  "**/coverage/**",
-  "**/__tests__/**",
-  "**/__mocks__/**",
-  "**/__snapshots__/**",
-  "**/test/**",
-  "**/tests/**",
-  "**/spec/**",
-  "**/specs/**",
-  "**/setupTests.tsx",
-  "**/*.spec.tsx",
-  "**/*.test.tsx",
-  "**/*.docs.tsx",
-  "**/*.e2e.tsx",
-  "**/*.helper.tsx",
-];
 
 export const App: FunctionComponent<
   IAppProps
@@ -55,25 +33,40 @@ export const App: FunctionComponent<
 
   const [selectedModel, setSelectedModel] = useState(models[0].value);
   const [excludePatterns, setExcludePatterns] = useState(
-    initialExcludePatterns.join("\n")
+    defaultExcludePatterns.join("\n")
   );
+  const [template, setTemplate] = useState(defaultTemplate);
+
   const [isCollapsed, setIsCollapsed] = useState(true);
 
   const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedModel(e.target.value);
+    messageHandler.send(MessageCommands.STORE_DATA, {
+      selectedModel: e.target.value,
+    });
   };
 
   const handleExcludePatternsChange = (
     e: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
     setExcludePatterns(e.target.value);
+    messageHandler.send(MessageCommands.STORE_DATA, {
+      excludePatterns: e.target.value,
+    });
+  };
+
+  const handleTemplateChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setTemplate(e.target.value);
+    messageHandler.send(MessageCommands.STORE_DATA, {
+      template: e.target.value,
+    });
   };
 
   const scan = () => {
     setMessage("");
     setScanning(true);
     messageHandler
-      .request<string>("GET_DATA", { selectedModel, excludePatterns })
+      .request<string>(MessageCommands.SCAN, { excludePatterns })
       .then((msg) => {
         setMessage(msg);
         setScanning(false);
@@ -81,17 +74,32 @@ export const App: FunctionComponent<
   };
 
   useEffect(() => {
-    messageHandler.request<string>("GET_GLOBAL_STATE").then((msg) => {
-      const { selectedModel, excludePatterns } = JSON.parse(msg);
+    messageHandler
+      .request<string>(MessageCommands.GET_GLOBAL_STATE)
+      .then((msg) => {
+        const { selectedModel, excludePatterns, template } = JSON.parse(msg);
 
-      selectedModel && setSelectedModel(selectedModel);
-      excludePatterns && setExcludePatterns(excludePatterns);
-    });
+        selectedModel && setSelectedModel(selectedModel);
+        excludePatterns && setExcludePatterns(excludePatterns);
+        template && setTemplate(template);
+      });
   }, []);
 
   return (
     <div className="app">
       <h1>Welcome to storybookGPT</h1>
+
+      <p>
+        Inspired by{" "}
+        <a href="https://storybook.js.org/blog/build-your-own-storybook-gpt/">
+          https://storybook.js.org/blog/build-your-own-storybook-gpt/
+        </a>
+      </p>
+      <p>
+        This extension assists you in scanning your React .tsx components of
+        current workspace and automates the generation of Storybook stories
+        using OpenAI's GPT model gpt-3.5-turbo.
+      </p>
 
       <div className="app__actions">
         <VSCodeButton appearance="primary" onClick={scan} disabled={scanning}>
@@ -109,34 +117,54 @@ export const App: FunctionComponent<
       <div className="settings">
         {!isCollapsed && (
           <div className="settings__content">
-            <div className="settings__field">
-              <label htmlFor="model-dropdown" className="settings__field-label">
-                ChatGPT model to use:
-              </label>
-              <VSCodeDropdown
-                id="model-dropdown"
-                onChange={handleModelChange}
-                value={selectedModel}
-              >
-                {models.map((model) => (
-                  <VSCodeOption key={model.value} value={model.value}>
-                    {model.label}
-                  </VSCodeOption>
-                ))}
-              </VSCodeDropdown>
+            <div className="column">
+              <div className="settings__field">
+                <label
+                  htmlFor="model-dropdown"
+                  className="settings__field-label"
+                >
+                  ChatGPT model:
+                </label>
+                <VSCodeDropdown
+                  id="model-dropdown"
+                  onChange={handleModelChange}
+                  value={selectedModel}
+                >
+                  {models.map((model) => (
+                    <VSCodeOption key={model.value} value={model.value}>
+                      {model.label}
+                    </VSCodeOption>
+                  ))}
+                </VSCodeDropdown>
+              </div>
+
+              <div className="settings__field">
+                <label className="settings__field-label">
+                  Scan exclude patterns:
+                </label>
+                <VSCodeTextArea
+                  value={excludePatterns}
+                  onChange={handleExcludePatternsChange}
+                  rows={10}
+                  cols={50}
+                  placeholder="Enter exclude patterns, one per line"
+                />
+              </div>
             </div>
 
-            <div className="settings__field">
-              <label className="settings__field-label">
-                Scan exclude patterns:
-              </label>
-              <VSCodeTextArea
-                value={excludePatterns}
-                onChange={handleExcludePatternsChange}
-                rows={10}
-                cols={50}
-                placeholder="Enter exclude patterns, one per line"
-              />
+            <div className="template-column">
+              <div className="settings__field">
+                <label className="settings__field-label">
+                  Storybook template:
+                </label>
+                <VSCodeTextArea
+                  value={template}
+                  onChange={handleTemplateChange}
+                  rows={14}
+                  cols={50}
+                  placeholder="Enter storybook template"
+                />
+              </div>
             </div>
           </div>
         )}
