@@ -1,7 +1,7 @@
 {
   "name": "vscode-storybookGPT",
   "displayName": "vscode-storybookGPT",
-  "description": "",
+  "description": "This vscode extension assists you in scanning your React components of current workspace and automates the generation of Storybook stories using OpenAI's GPT model.",
   "version": "0.0.1",
   "repository": {
     "url": "https://github.com/estruyf/vscode-react-webview-template",
