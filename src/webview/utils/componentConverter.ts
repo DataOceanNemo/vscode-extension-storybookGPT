@@ -9,7 +9,7 @@ export type ConvertType = {
 };
 
 function stripCodeBlockAnnotations(text: string) {
-  return text.replace(/```(typescript|javascript)?\n([\s\S]*?)\n```/g, '$2');
+  return text.replace(/```(typescript|javascript|tsx|jsx)?\n([\s\S]*?)\n```/g, '$2');
 }
 
 export async function ComponentConverter({ component, openaiApiKey, selectedModel, template }: ConvertType) {
