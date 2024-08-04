@@ -36,9 +36,7 @@ The extension provides the following commands:
 
 ## Release Notes
 
-### 0.0.1
-
-Initial release of storybookGPT.
+Please refer to [change log here](https://github.com/DataOceanNemo/vscode-extension-storybookGPT/blob/master/CHANGELOG.md).
 
 ## Known Issues
 
