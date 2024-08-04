@@ -45,6 +45,7 @@ const config = [
       new HtmlWebpackPlugin({
         template: "./src/webview/public/index.html",
         filename: "index.html",
+        favicon: "./src/webview/public/favicon.ico",
       }),
       new Dotenv({
         path: envLocalPath,

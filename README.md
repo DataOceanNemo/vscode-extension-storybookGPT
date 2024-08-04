@@ -19,16 +19,6 @@ Using MUI source code as example:
 
 - **OpenAI API Key**: The extension requires an OpenAI API key to generate stories. You can set this key through the extension's prompts.
 
-## Extension Settings
-
-This extension contributes the following settings:
-
-- `storybookGPT.enable`: Enable/disable this extension.
-
-## Known Issues
-
-- None reported.
-
 ## Commands
 
 The extension provides the following commands:
@@ -49,5 +39,9 @@ The extension provides the following commands:
 ### 1.0.0
 
 Initial release of storybookGPT.
+
+## Known Issues
+
+- None reported.
 
 **Enjoy!**
