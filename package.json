@@ -5,7 +5,7 @@
   "version": "0.0.1",
   "icon": "icon.png",
   "repository": {
-    "url": "https://github.com/estruyf/vscode-react-webview-template",
+    "url": "https://github.com/DataOceanNemo/vscode-extension-storybookGPT",
     "type": "git"
   },
   "engines": {
