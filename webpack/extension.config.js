@@ -5,6 +5,7 @@
 const path = require("path");
 const envLocalPath = path.resolve(__dirname, "../.env.local");
 const Dotenv = require("dotenv-webpack");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 //@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
@@ -50,6 +51,12 @@ const extensionConfig = {
     new Dotenv({
       path: envLocalPath,
     }),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: path.resolve(__dirname, "../icon.png"), to: path.resolve(__dirname, "../dist") }
+      ]
+    })
   ],
 };
+
 module.exports = [extensionConfig];

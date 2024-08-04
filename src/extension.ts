@@ -18,6 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
     panel.webview.onDidReceiveMessage(customMessageHandlers(panel, context), undefined, context.subscriptions);
 
     panel.webview.html = getWebviewContent(context, panel.webview);
+    panel.iconPath = vscode.Uri.joinPath(context.extensionUri, "icon.png");
   });
 
   // Command to delete the API key from the secret storage
