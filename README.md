@@ -1,3 +1,7 @@
+<div style="text-align: center;">
+  <img src="icon.png" alt="Icon" width="200"/>
+</div>
+
 # storybookGPT README
 
 Inspired by https://storybook.js.org/blog/build-your-own-storybook-gpt/
